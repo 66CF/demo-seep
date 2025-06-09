@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek 对话 Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入 highlight.js 的暗色主题样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="controls-header">
+            <h1>DeepSeek 对话 Pro</h1>
+            <div class="api-key-container">
+                <label for="api-key">API Key:</label>
+                <input type="password" id="api-key" placeholder="在此输入您的 DeepSeek API Key">
+            </div>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <label for="model-selector">选择模型:</label>
+                    <select id="model-selector">
+                        <option value="deepseek-chat">deepseek-chat (通用)</option>
+                        <option value="deepseek-reasoner">deepseek-reasoner (推理)</option>
+                    </select>
+                </div>
+                <div class="control-item">
+                    <label>启用系统提示词:</label>
+                    <label class="switch">
+                        <input type="checkbox" id="system-prompt-switch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+             <div class="system-prompt-wrapper">
+                <textarea id="system-prompt-text" placeholder="请输入系统提示词..." disabled>你是一个由 DeepSeek 开发的AI助手，请使用 Markdown 格式进行回复。</textarea>
+            </div>
+        </div>
+
+        <div class="chat-window" id="chat-window">
+            <!-- 消息会在这里显示 -->
+        </div>
+
+        <div class="thinking-indicator" id="thinking-indicator" style="display: none;">
+            <span></span><span></span><span></span>
+        </div>
+
+        <form id="chat-form" class="chat-input-area">
+            <textarea id="user-input" placeholder="输入您的问题... (Shift+Enter 换行)" rows="1"></textarea>
+            <button type="submit">发送</button>
+        </form>
+    </div>
+
+    <!-- 引入 Markdown 解析、安全过滤和代码高亮库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

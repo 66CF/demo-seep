@@ -1,0 +1,298 @@
+:root {
+    --bg-color: #1e1e1e;
+    --text-color: #dcdcdc;
+    --primary-color: #4a90e2;
+    --control-bg: #2d2d2d;
+    --border-color: #444;
+    --user-msg-bg: #2c3e50;
+    --bot-msg-bg: #34495e;
+    --reasoning-bg: #2a3640;
+    --code-bg: #1a1a1a;
+    --quote-border: #5a6a7a;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 800px;
+    height: 95vh;
+    background-color: var(--control-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.controls-header {
+    padding: 16px;
+    background-color: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+    text-align: center;
+    margin: 0 0 16px 0;
+    color: var(--primary-color);
+    font-size: 1.5em;
+}
+
+.api-key-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+#api-key {
+    flex-grow: 1;
+    margin-left: 8px;
+    background: #3c3c3c;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-item label {
+    white-space: nowrap;
+}
+
+select, button, textarea {
+    background-color: #3c3c3c;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 1em;
+}
+
+select {
+    width: 100%;
+}
+
+.system-prompt-wrapper {
+    margin-top: 12px;
+}
+
+#system-prompt-text {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    min-height: 50px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+#system-prompt-text:disabled {
+    background-color: #252525;
+    border-color: #333;
+    cursor: not-allowed;
+}
+
+
+/* UISwitch 样式 */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: .4s;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+.slider.round {
+    border-radius: 34px;
+}
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.chat-window {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    max-width: 90%; /* 增加宽度以容纳代码块 */
+    padding: 12px 16px;
+    border-radius: 18px;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+.message.user-message {
+    background-color: var(--user-msg-bg);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.message.bot-message {
+    background-color: var(--bot-msg-bg);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+/* --- Markdown 元素样式 --- */
+.message .content h1, .message .content h2, .message .content h3 {
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+}
+.message .content p {
+    margin: 0 0 0.8em 0;
+}
+.message .content ul, .message .content ol {
+    padding-left: 20px;
+}
+.message .content li {
+    margin-bottom: 0.4em;
+}
+.message .content blockquote {
+    margin: 0.8em 0;
+    padding: 0.2em 1em;
+    border-left: 4px solid var(--quote-border);
+    background-color: rgba(0,0,0,0.1);
+    color: #b0c4de;
+}
+.message .content code:not(pre > code) {
+    background-color: var(--code-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+.message .content pre {
+    background-color: var(--code-bg);
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0.8em 0;
+}
+.message .content pre code {
+    font-family: 'Courier New', Courier, monospace;
+    background: none;
+    padding: 0;
+}
+/* --- Markdown 样式结束 --- */
+
+/* 推理过程样式 */
+.reasoning-block {
+    margin-bottom: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--primary-color);
+}
+.reasoning-block summary {
+    background-color: var(--reasoning-bg);
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--primary-color);
+    outline: none;
+}
+.reasoning-block .reasoning-content {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 0px 12px;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.95em;
+}
+
+
+.thinking-indicator {
+    padding: 10px 20px;
+    align-self: flex-start;
+}
+.thinking-indicator span {
+    height: 10px;
+    width: 10px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+.thinking-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.thinking-indicator span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
+    gap: 10px;
+}
+
+#user-input {
+    flex-grow: 1;
+    resize: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+#chat-form button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+#chat-form button:hover {
+    background-color: #3a80d2;
+}
