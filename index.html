@@ -203,17 +203,17 @@
             padding: 10px 15px; /* Add padding to inner content */
         }
         
-        .reasoning-container details {
-            border-bottom: 1px solid var(--border-color);
+        .reasoning-container {
+             border-bottom: 1px solid var(--border-color);
         }
-        .reasoning-container summary {
+        .reasoning-container details summary {
             cursor: pointer;
             color: #a0a0a0;
             font-size: 0.9em;
             padding-bottom: 8px;
             outline: none;
         }
-        .reasoning-container summary:hover {
+        .reasoning-container details summary:hover {
             color: var(--text-color);
         }
         .reasoning-content {
@@ -434,35 +434,54 @@
             scrollToBottom();
         }
 
+        /**
+         * @description Surgically updates the assistant message element to preserve state (like <details> open)
+         * and improve performance by avoiding full innerHTML rewrites.
+         */
         function updateAssistantMessage({ reasoning, content }) {
             if (!currentAssistantMessageElement) return;
-        
-            let html = '';
+
+            let reasoningContainer = currentAssistantMessageElement.querySelector('.reasoning-container');
+            let mainContentContainer = currentAssistantMessageElement.querySelector('.main-content');
+
+            // Handle reasoning part
             if (reasoning) {
-                html += `
-                    <div class="reasoning-container">
+                if (!reasoningContainer) {
+                    // Create the whole reasoning structure if it doesn't exist
+                    reasoningContainer = document.createElement('div');
+                    reasoningContainer.className = 'reasoning-container';
+                    reasoningContainer.innerHTML = `
                         <details>
                             <summary>查看思考过程</summary>
-                            <div class="reasoning-content">${marked.parse(reasoning)}</div>
-                        </details>
-                    </div>`;
-            }
-
-            // Always wrap main content for consistent structure
-            html += `<div class="main-content">${marked.parse(content || '')}</div>`;
-            
-            currentAssistantMessageElement.innerHTML = html;
-
-            // Re-append cursor at the end of the main content
-            const mainContentEl = currentAssistantMessageElement.querySelector('.main-content');
-            if(mainContentEl) {
-                if (!cursorElement) {
-                    cursorElement = document.createElement('span');
-                    cursorElement.classList.add('cursor');
+                            <div class="reasoning-content"></div>
+                        </details>`;
+                    // Insert before the main content if it exists, otherwise append
+                    if (mainContentContainer) {
+                        currentAssistantMessageElement.insertBefore(reasoningContainer, mainContentContainer);
+                    } else {
+                        currentAssistantMessageElement.appendChild(reasoningContainer);
+                    }
                 }
-                mainContentEl.appendChild(cursorElement);
+                const reasoningContentDiv = reasoningContainer.querySelector('.reasoning-content');
+                if (reasoningContentDiv) {
+                    reasoningContentDiv.innerHTML = marked.parse(reasoning);
+                }
             }
-            scrollToBottom();
+            
+            // Handle main content part
+            if (!mainContentContainer) {
+                mainContentContainer = document.createElement('div');
+                mainContentContainer.className = 'main-content';
+                currentAssistantMessageElement.appendChild(mainContentContainer);
+            }
+            mainContentContainer.innerHTML = marked.parse(content || '');
+
+            // Append cursor to the main content
+            if (!cursorElement) {
+                cursorElement = document.createElement('span');
+                cursorElement.classList.add('cursor');
+            }
+            mainContentContainer.appendChild(cursorElement);
         }
         
         function finalizeAssistantMessage() {
@@ -471,7 +490,6 @@
             }
             cursorElement = null;
             currentAssistantMessageElement = null;
-            scrollToBottom();
         }
 
         function toggleLoading(loading) {
@@ -546,6 +564,10 @@
                 const decoder = new TextDecoder('utf-8');
                 
                 while (true) {
+                    // **SMART SCROLL**: Check if user is near the bottom BEFORE adding new content
+                    const scrollThreshold = 100; // pixels
+                    const isNearBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < scrollThreshold;
+
                     const { done, value } = await reader.read();
                     if (done) break;
 
@@ -561,7 +583,6 @@
                                 const parsedData = JSON.parse(data);
                                 const delta = parsedData.choices[0].delta;
                                 
-                                // Handle both reasoning and content streams
                                 if (delta.reasoning_content) {
                                     accumulatedReasoning += delta.reasoning_content;
                                 }
@@ -579,9 +600,13 @@
                             }
                         }
                     }
+
+                    // **SMART SCROLL**: Only scroll if the user was already at the bottom
+                    if(isNearBottom) {
+                        scrollToBottom();
+                    }
                 }
                 
-                // IMPORTANT: Only add the final content to the conversation history
                 conversationHistory.push({ role: 'assistant', content: accumulatedContent });
                 
                 await saveChatRecord(userText, accumulatedContent, accumulatedReasoning, promptToggle.checked);
@@ -595,7 +620,9 @@
             }
         });
 
+        // Initial scroll to bottom on page load
         scrollToBottom();
+
     </script>
 
 </body>
