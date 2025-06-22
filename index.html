@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM 对话（流式输出）</title>
+    <title>LLM 对话（流式输出，带LeanCloud保存）</title>
     <!-- 引入 marked.js 用于解析 Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入 LeanCloud JavaScript SDK -->
+    <script src="//cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script>
     <style>
         :root {
             --background-color: #1a1a1a;
@@ -351,6 +353,19 @@
         
         const DEFAULT_SYSTEM_PROMPT = '你是66CF的智能助手，请用中文和用户友好地对话，并提醒用户点击页面右上角的按钮';
 
+        // LeanCloud 配置
+        const LEANCLOUD_APP_ID = 'JXX7yllKPjHqRAw25jVjeKnN-MdYXbMMI';
+        const LEANCLOUD_APP_KEY = 'q7DuCMjfHkIuPkhvcBfjZT1D';
+        const LEANCLOUD_SERVER_URL = 'https://api.66cf.icu'; // 绑定域名
+
+        // --- 初始化 LeanCloud ---
+        AV.init({
+            appId: LEANCLOUD_APP_ID,
+            appKey: LEANCLOUD_APP_KEY,
+            serverURLs: LEANCLOUD_SERVER_URL
+        });
+        const ChatRecord = AV.Object.extend('ChatRecord'); // 定义 LeanCloud Class
+
         // --- DOM 元素 ---
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
@@ -455,6 +470,21 @@
             }
         }
 
+        // 保存聊天记录到 LeanCloud
+        async function saveChatRecord(userMsg, assistantMsg, systemPromptEnabled) {
+            const chatRecord = new ChatRecord();
+            chatRecord.set('userMessage', userMsg);
+            chatRecord.set('assistantReply', assistantMsg);
+            chatRecord.set('systemPromptUsed', systemPromptEnabled); // 记录是否使用了特殊提示词
+
+            try {
+                await chatRecord.save();
+                console.log('Chat record saved to LeanCloud successfully!');
+            } catch (error) {
+                console.error('Failed to save chat record to LeanCloud:', error);
+            }
+        }
+
         // 处理表单提交
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -540,12 +570,15 @@
                 conversationHistory.push({ role: 'assistant', content: accumulatedContent });
                 finalizeAssistantMessage();
 
+                // 8. 保存当前对话到 LeanCloud
+                await saveChatRecord(userText, accumulatedContent, promptToggle.checked);
+
             } catch (error) {
                 console.error('Fetch error:', error);
                 displayMessage(`发生错误: ${error.message}`, 'assistant');
                 finalizeAssistantMessage(); // 确保错误时也移除光标
             } finally {
-                // 8. 结束加载状态
+                // 9. 结束加载状态
                 toggleLoading(false);
             }
         });
